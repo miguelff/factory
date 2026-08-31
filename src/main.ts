@@ -9,6 +9,7 @@ if (args.includes("--version")) {
   const runtime = await startRuntime({
     environment: process.env,
     port: readPort(args),
+    repositoryDirectory: process.cwd(),
   });
 
   console.log(`factory listening ${runtime.address}`);

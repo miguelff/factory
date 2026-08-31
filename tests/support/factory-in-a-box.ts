@@ -1,6 +1,7 @@
 import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { delimiter, join } from "node:path";
+import { resolveStatePath } from "../../src/state/state-path";
 
 const projectRoot = join(import.meta.dir, "../..");
 
@@ -18,6 +19,8 @@ export interface RunningFactory {
 
 export interface StartFactoryOptions {
   readonly environment?: Readonly<Record<string, string>>;
+  readonly factoryHome?: string;
+  readonly launchDirectory?: string;
   readonly pathEntries?: readonly string[];
 }
 
@@ -60,7 +63,8 @@ export async function startFactory(
 ): Promise<RunningFactory> {
   const boxRoot = await mkdtemp(join(tmpdir(), "factory-box-"));
   const binaryPath = join(boxRoot, "factory");
-  const factoryHome = join(boxRoot, "home");
+  const factoryHome = options.factoryHome ?? join(boxRoot, "home");
+  const launchDirectory = options.launchDirectory ?? repo.root;
   let child: Bun.Subprocess<"ignore", "pipe", "pipe"> | undefined;
 
   try {
@@ -82,7 +86,7 @@ export async function startFactory(
     }
 
     const runningChild = Bun.spawn([binaryPath, "up", "--port", "0"], {
-      cwd: repo.root,
+      cwd: launchDirectory,
       env: environment,
       stderr: "pipe",
       stdout: "pipe",
@@ -90,11 +94,12 @@ export async function startFactory(
     child = runningChild;
     const stderr = new Response(runningChild.stderr).text();
     const address = await readListeningAddress(runningChild.stdout);
+    const statePath = await resolveStatePath(factoryHome, launchDirectory);
     let stopResult: Promise<{ readonly exitCode: number; readonly stderr: string }> | undefined;
 
     return {
       address,
-      statePath: join(factoryHome, "state.db"),
+      statePath,
       stop() {
         stopResult ??= stopFactory(runningChild, stderr, boxRoot);
         return stopResult;
