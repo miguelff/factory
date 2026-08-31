@@ -1,8 +1,8 @@
 # Factory
 
-Factory is a ticket-driven software delivery system in which specialized AI-agent roles pull work through versioned pipelines. A standalone executable built with TypeScript and Bun will provide the CLI, orchestrator, HTTP API, embedded web UI, importers, and SQLite state store.
+Factory is a ticket-driven software delivery system in which specialized AI-agent roles pull work through versioned pipelines. A standalone executable built with TypeScript and Bun provides the CLI, orchestrator, HTTP API, embedded web UI, importers, and SQLite state store.
 
-The repository is at bootstrap. Architecture and the contributor contract are established; the first roadmap task is not complete yet.
+The first vertical scaffold boots an isolated local runtime. Later roadmap tasks add the ticket and pipeline behavior described in the architecture contract.
 
 ## Start here
 
@@ -20,6 +20,9 @@ bun install
 bun run check
 bun run build
 ./dist/factory --version
+FACTORY_HOME="$(mktemp -d)" ./dist/factory up --port 0
 ```
 
-`bun run check` runs strict typechecking and the test suite. Build artifacts are written to `dist/`.
+`bun run check` runs strict typechecking and the test suite. `factory up` binds to loopback; port `0` asks the operating system for an available port and prints the address. Runtime state is stored in `state.db` under `FACTORY_HOME`, which defaults to `~/.factory`.
+
+`bun run build:release` cross-compiles standalone executables into `dist/release/` for macOS and Linux on arm64 and x64. CI validates every target independently. Pushing a `v*` tag runs the same checks and publishes all four executables to a GitHub release.
