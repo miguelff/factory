@@ -1,6 +1,6 @@
 # Architecture principles and system map
 
-This is a maintained summary of the [Software Factory architecture](https://app.notion.com/p/3cc433c39871816eade1c7e8b86af3c4), updated 2026-08-31. Notion remains the detailed product source; this file records the boundaries contributors need every day.
+This is an explanatory view of the [Software Factory architecture](https://app.notion.com/p/3cc433c39871816eade1c7e8b86af3c4), updated 2026-08-31. [AGENTS.md](../AGENTS.md) is the complete, injected system contract and contains every critical restriction. This document supplies human-oriented rationale and must not introduce requirements absent from `AGENTS.md`.
 
 ## Product shape
 
