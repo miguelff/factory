@@ -14,6 +14,8 @@ A standalone Bun executable hosts the CLI, HTTP API, restartable orchestrator, S
 
 Tickets and append-only transitions are authoritative. Heavy data stays elsewhere and is referenced: definitions in git, plans in files, PRs in the forge, and conversations in Hermes. A reboot rebuilds workspaces from tickets without guessing.
 
+Each repository has one versioned SQLite database below the machine-wide `FACTORY_HOME`. Its directory key combines the repository name with a hash of its canonical path, preventing same-named repositories from sharing state. A cleanly stopped database is backed up by copying that single file.
+
 ### Coordination is a state-machine operation
 
 The transition API is the sole validator of ownership, legal edges, entry gates, typed reasons, and attempt limits. Conversation may clarify an exception but cannot substitute for a recorded transition.

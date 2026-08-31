@@ -1,12 +1,14 @@
-import { Database } from "bun:sqlite";
 import { mkdir } from "node:fs/promises";
 import { homedir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
+import { openStateStore } from "./state/sqlite-state-store";
+import { resolveStatePath } from "./state/state-path";
 import index from "./ui/index.html";
 
 interface RuntimeOptions {
   readonly environment: NodeJS.ProcessEnv;
   readonly port: number;
+  readonly repositoryDirectory: string;
 }
 
 interface FactoryRuntime {
@@ -16,9 +18,10 @@ interface FactoryRuntime {
 
 export async function startRuntime(options: RuntimeOptions): Promise<FactoryRuntime> {
   const factoryHome = options.environment.FACTORY_HOME ?? join(homedir(), ".factory");
-  await mkdir(factoryHome, { recursive: true });
+  const statePath = await resolveStatePath(factoryHome, options.repositoryDirectory);
+  await mkdir(dirname(statePath), { recursive: true });
 
-  const database = new Database(join(factoryHome, "state.db"), { create: true });
+  const database = openStateStore(statePath);
 
   try {
     await verifyGit();

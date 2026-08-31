@@ -15,7 +15,12 @@ test("compiled Factory boots an isolated runtime and shuts down cleanly", async 
     const fakeGit = join(fakeBin, "git");
     await writeFile(
       fakeGit,
-      '#!/bin/sh\nprintf "%s\\n" "$*" > "$FACTORY_TEST_GIT_INVOCATION"\n',
+      `#!/bin/sh
+printf "%s\\n" "$*" >> "$FACTORY_TEST_GIT_INVOCATION"
+if [ "$*" = "rev-parse --show-toplevel" ]; then
+  printf "%s\\n" "$PWD"
+fi
+`,
     );
     await chmod(fakeGit, 0o755);
     const repo = await newFactoryRepo();
@@ -36,10 +41,12 @@ test("compiled Factory boots an isolated runtime and shuts down cleanly", async 
 
         expect((await stat(factory.statePath)).isFile()).toBe(true);
         const database = new Database(factory.statePath, { readonly: true });
-        expect(database.query("PRAGMA user_version").get()).toEqual({ user_version: 0 });
+        expect(database.query("PRAGMA user_version").get()).toEqual({ user_version: 1 });
         database.close();
 
-        expect(await readFile(gitInvocation, "utf8")).toBe("--version\n");
+        expect(await readFile(gitInvocation, "utf8")).toBe(
+          "rev-parse --show-toplevel\n--version\n",
+        );
 
         expect(await factory.stop()).toEqual({ exitCode: 0, stderr: "" });
       } finally {

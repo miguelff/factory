@@ -23,7 +23,9 @@ bun run build
 FACTORY_HOME="$(mktemp -d)" ./dist/factory up --port 0
 ```
 
-`bun run check` runs strict typechecking and the test suite. `factory up` binds to loopback; port `0` asks the operating system for an available port and prints the address. Runtime state is stored in `state.db` under `FACTORY_HOME`, which defaults to `~/.factory`.
+`bun run check` runs strict typechecking and the test suite. `factory up` binds to loopback; port `0` asks the operating system for an available port and prints the address.
+
+Factory keeps each repository's live state in one SQLite file under `FACTORY_HOME`, which defaults to `~/.factory`. Repository directories use the readable form `<repo-name>-<path-hash>/state.db`, so repositories with the same name remain isolated. After stopping Factory cleanly, back up a repository by copying its `state.db` file. The schema is migrated automatically on startup; a binary refuses to open a database created by a newer schema version.
 
 Acceptance tests use the shared factory-in-a-box harness in `tests/support/`. Each box compiles the real executable, runs it from a committed throwaway repository, isolates its SQLite state, binds an ephemeral loopback port, and owns its process and temporary-file cleanup. New ticket behaviors should extend this harness at their outermost available surface instead of assembling ad hoc runtimes.
 
