@@ -25,4 +25,6 @@ FACTORY_HOME="$(mktemp -d)" ./dist/factory up --port 0
 
 `bun run check` runs strict typechecking and the test suite. `factory up` binds to loopback; port `0` asks the operating system for an available port and prints the address. Runtime state is stored in `state.db` under `FACTORY_HOME`, which defaults to `~/.factory`.
 
+Acceptance tests use the shared factory-in-a-box harness in `tests/support/`. Each box compiles the real executable, runs it from a committed throwaway repository, isolates its SQLite state, binds an ephemeral loopback port, and owns its process and temporary-file cleanup. New ticket behaviors should extend this harness at their outermost available surface instead of assembling ad hoc runtimes.
+
 `bun run build:release` cross-compiles standalone executables into `dist/release/` for macOS and Linux on arm64 and x64. CI validates every target independently. Pushing a `v*` tag runs the same checks and publishes all four executables to a GitHub release.
