@@ -1,0 +1,4 @@
+interface:
+  display_name: "Kickoff"
+  short_description: "Close one ticket and start the next safely"
+  default_prompt: "Use $kickoff to finish the current ticket handoff and begin the next eligible roadmap task."
